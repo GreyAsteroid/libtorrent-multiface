@@ -43,11 +43,7 @@ else
 		<include>/opt/homebrew/include
 	;
 
-	# the names are decorated in MacPorts.
-	lib boost_system : : <target-os>darwin <name>boost_system-mt $(boost-lib-search-path)
-		: : $(boost-include-path) ;
-
-	lib boost_system : : <name>boost_system ;
+	lib boost_system : : <name>boost_system $(boost-lib-search-path) : : $(boost-include-path) ;
 }
 
 use-project /try_signal : ./deps/try_signal ;
@@ -187,7 +183,7 @@ rule linking ( properties * )
 	else if [ version.version-less $(jam-version) : 1990 0 ]
 	{
 		# the visibility feature was introduced in boost-1.69. This was close to
-		# when the verisoning scheme changed from year to (low) version numbers.
+		# when the versioning scheme changed from year to (low) version numbers.
 		# in boost-1.70
 		result += <visibility>hidden ;
 	}
@@ -285,6 +281,13 @@ rule warnings ( properties * )
 # these warnings should all be addressed. Either by transitioning to span and
 # array, or by suppressing the warning for specific code
 		result += <cxxflags>-Wno-unsafe-buffer-usage ;
+
+# different versions of clang disagree on how to warn about switch statements
+# you either get:
+# error: 'switch' missing 'default' label [-Werror,-Wswitch-default]
+# or:
+# error: default label in switch which covers all enumeration values [-Werror,-Wcovered-switch-default]
+		result += <cxxflags>-Wno-switch-default ;
 	}
 
 	if <toolset>gcc in $(properties)

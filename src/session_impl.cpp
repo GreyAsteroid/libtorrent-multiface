@@ -1302,9 +1302,11 @@ namespace {
 #endif
 			req.ssl_ctx = &m_ssl_ctx;
 #endif
-
-		auto ls = req.outgoing_socket.get();
-		if (ls)
+		if (const auto announce_port = std::uint16_t(m_settings.get_int(settings_pack::announce_port)))
+		{
+			req.listen_port = announce_port;
+		}
+		else if (auto ls = req.outgoing_socket.get())
 		{
 			req.listen_port =
 #ifdef TORRENT_SSL_PEERS
@@ -4876,9 +4878,9 @@ namespace {
 		return ret;
 	}
 
-	torrent_handle session_impl::find_torrent_handle(sha1_hash const& info_hash)
+	torrent_handle session_impl::find_torrent_handle(info_hash_t const& info_hash)
 	{
-		return torrent_handle(find_torrent(info_hash_t(info_hash)));
+		return torrent_handle(find_torrent(info_hash));
 	}
 
 	void session_impl::async_add_torrent(add_torrent_params* params)
